@@ -62,11 +62,18 @@ impl Requests {
         result.error_for_status()?;
         unreachable!();
     }
+
+    pub fn sign_out(&self) -> reqwest::Result<()> {
+        self.get_client(Policy::default())?
+            .get("https://satori.tcs.uj.edu.pl/logout")
+            .send()?
+            .error_for_status()?;
+        Ok(())
+    }
 }
 
 impl Drop for Requests {
     fn drop(&mut self) {
-        println!("Storing cookies");
         save_cookies(&mut self.cookie_store.lock().unwrap());
     }
 }

@@ -21,6 +21,7 @@ struct Opts {
 enum Subcommand {
     SetUsername(SetUsername),
     Submit(Submit),
+    SignOut,
 }
 
 #[derive(Parser)]
@@ -35,9 +36,9 @@ struct Submit {
     ci: bool,
 }
 
-fn prompt_password() -> String {
+fn prompt_password(username: &str) -> String {
     dialoguer::Password::with_theme(&ColorfulTheme::default())
-        .with_prompt("Enter your SATORI password")
+        .with_prompt(format!("Password for {}", username))
         .interact()
         .unwrap()
 }
@@ -79,7 +80,7 @@ fn ensure_signed_in(ci: bool) -> Requests {
             );
             exit(1);
         }
-        prompt_password()
+        prompt_password(&username)
     });
     if !requests.sign_in(&username, &password).unwrap() {
         println!("{}", style("Wrong password").red().bold());
@@ -94,11 +95,17 @@ fn main() {
     match opts.subcommand {
         Subcommand::SetUsername(set_opts) => {
             set_username(&set_opts.username);
+            let requests = Requests::new().unwrap();
+            requests.sign_out().unwrap();
             println!(
                 "{}{}",
                 style("Stored username: ").green(),
                 &set_opts.username
             );
+        }
+        Subcommand::SignOut => {
+            let requests = Requests::new().unwrap();
+            requests.sign_out().unwrap();
         }
         Subcommand::Submit(submit) => {
             let requests = ensure_signed_in(submit.ci);
