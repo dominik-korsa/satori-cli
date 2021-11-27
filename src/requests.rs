@@ -1,5 +1,6 @@
 use crate::config::{load_cookies, save_cookies};
 use crate::my_cookie_store::MyCookieStore;
+use crate::parser;
 use heck::KebabCase;
 use reqwest::redirect::Policy;
 use std::path::Path;
@@ -79,7 +80,7 @@ impl Requests {
         problem_id: &str,
         filename: &Path,
         content: &str,
-    ) -> reqwest::Result<String> {
+    ) -> reqwest::Result<()> {
         let safe_filename = format!(
             "{}.{}",
             filename
@@ -109,16 +110,26 @@ impl Requests {
             panic!(); // TODO: Add custom error type
         }
         if result.status() == 302 {
-            return Ok(result
-                .headers()
-                .get("Location")
-                .expect("Location header not found")
-                .to_str()
-                .unwrap()
-                .to_string());
+            return Ok(());
         }
         result.error_for_status()?;
         unreachable!();
+    }
+
+    pub fn get_latest_solution_id(
+        &self,
+        contest_id: &str,
+        problem_id: &str,
+    ) -> reqwest::Result<String> {
+        let result = self
+            .get_client(Policy::default())?
+            .get(format!(
+                "https://satori.tcs.uj.edu.pl/contest/{}/results?results_filter_problem={}",
+                contest_id, problem_id,
+            ))
+            .send()?
+            .error_for_status()?;
+        Ok(parser::results::get_latest_solution_id(&result.text()?))
     }
 }
 

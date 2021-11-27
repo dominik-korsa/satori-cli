@@ -1,5 +1,6 @@
 mod config;
 mod my_cookie_store;
+mod parser;
 mod requests;
 
 use crate::config::{get_password, get_username, set_username};
@@ -136,17 +137,24 @@ fn main() {
                 }
                 Some(captures) => (captures[1].to_string(), captures[2].to_string()),
             };
-            let results_url = requests
+            requests
                 .submit(&contest_id, &problem_id, &submit.filename, &content)
                 .unwrap();
             println!("{}", style("Submitted solution").green());
+            let solution_id = requests
+                .get_latest_solution_id(&contest_id, &problem_id)
+                .unwrap();
+            let solution_url = format!(
+                "https://satori.tcs.uj.edu.pl/contest/{}/results/{}",
+                &contest_id, &solution_id
+            );
             println!(
                 "{} {}",
                 style("Results page:").green(),
-                style(&results_url).cyan().underlined()
+                style(&solution_url).cyan().underlined()
             );
             if submit.open {
-                open::that(&results_url).expect("Failed to open browser");
+                open::that(&solution_url).expect("Failed to open browser");
             }
         }
     }
