@@ -1,6 +1,6 @@
 [package]
 name = "satori-cli"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 description = "Command line program to submit solutions on code testing platform Satori"
 categories = ["command-line-utilities", "development-tools"]
