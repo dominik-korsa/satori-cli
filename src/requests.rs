@@ -1,6 +1,8 @@
 use crate::config::{load_cookies, save_cookies};
 use crate::my_cookie_store::MyCookieStore;
+use heck::KebabCase;
 use reqwest::redirect::Policy;
+use std::path::Path;
 use std::sync::Arc;
 
 pub struct Requests {
@@ -69,6 +71,54 @@ impl Requests {
             .send()?
             .error_for_status()?;
         Ok(())
+    }
+
+    pub fn submit(
+        &self,
+        contest_id: &str,
+        problem_id: &str,
+        filename: &Path,
+        content: &str,
+    ) -> reqwest::Result<String> {
+        let safe_filename = format!(
+            "{}.{}",
+            filename
+                .file_stem()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_kebab_case(),
+            filename.extension().unwrap().to_str().unwrap()
+        );
+        let form = reqwest::blocking::multipart::Form::new()
+            .text("problem", problem_id.to_string())
+            .part(
+                "codefile",
+                reqwest::blocking::multipart::Part::text(content.to_string())
+                    .file_name(safe_filename),
+            );
+        let result = self
+            .get_client(Policy::none())?
+            .post(format!(
+                "https://satori.tcs.uj.edu.pl/contest/{}/submit",
+                contest_id
+            ))
+            .multipart(form)
+            .send()?;
+        if result.status() == 200 {
+            panic!(); // TODO: Add custom error type
+        }
+        if result.status() == 302 {
+            return Ok(result
+                .headers()
+                .get("Location")
+                .expect("Location header not found")
+                .to_str()
+                .unwrap()
+                .to_string());
+        }
+        result.error_for_status()?;
+        unreachable!();
     }
 }
 

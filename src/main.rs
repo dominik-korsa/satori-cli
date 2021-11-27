@@ -7,6 +7,7 @@ use crate::requests::Requests;
 use clap::Parser;
 use console::style;
 use dialoguer::theme::ColorfulTheme;
+use std::fs;
 use std::path::PathBuf;
 use std::process::exit;
 
@@ -34,6 +35,8 @@ struct Submit {
     filename: PathBuf,
     #[clap(long, parse(try_from_str))]
     ci: bool,
+    // #[clap(short, long, parse(try_from_str))]
+    // open: bool,
 }
 
 fn prompt_password(username: &str) -> String {
@@ -109,6 +112,39 @@ fn main() {
         }
         Subcommand::Submit(submit) => {
             let requests = ensure_signed_in(submit.ci);
+            let url_regex = regex::Regex::new(
+                r"\b(?:https?://)?satori\.tcs\.uj\.edu\.pl/contest/(\d+)/problems/(\d+)(?:\s|$|/)",
+            )
+            .unwrap();
+            let content = fs::read_to_string(&submit.filename).unwrap();
+            let captures = url_regex.captures(&content);
+            let (contest_id, problem_id) = match captures {
+                None => {
+                    println!(
+                        "{}",
+                        style("Problem URL was not found in code").red().bold()
+                    );
+                    println!("{}", style("A valid URL looks like this:").red().bold());
+                    println!(
+                        "{}{}{}{}",
+                        style("https://satori.tcs.uj.edu.pl/contest/").cyan(),
+                        style("0123456").white(),
+                        style("/problems/").cyan(),
+                        style("0123456").white(),
+                    );
+                    exit(1);
+                }
+                Some(captures) => (captures[1].to_string(), captures[2].to_string()),
+            };
+            let results_url = requests
+                .submit(&contest_id, &problem_id, &submit.filename, &content)
+                .unwrap();
+            println!("{}", style("Submitted solution").green());
+            println!(
+                "{} {}",
+                style("Results page:").green(),
+                style(results_url).cyan().underlined()
+            );
         }
     }
 }
