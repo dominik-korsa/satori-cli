@@ -1,6 +1,6 @@
 [package]
 name = "satori-cli"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 
 [[bin]]
@@ -22,3 +22,4 @@ cookie = "0.15.0"
 bytes = "1.0.1"
 regex = "1.5.4"
 heck = "0.3.3"
+open = "2.0.1"

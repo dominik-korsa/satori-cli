@@ -33,10 +33,10 @@ struct SetUsername {
 #[derive(Parser)]
 struct Submit {
     filename: PathBuf,
-    #[clap(long, parse(try_from_str))]
+    #[clap(long)]
     ci: bool,
-    // #[clap(short, long, parse(try_from_str))]
-    // open: bool,
+    #[clap(short, long)]
+    open: bool,
 }
 
 fn prompt_password(username: &str) -> String {
@@ -143,8 +143,11 @@ fn main() {
             println!(
                 "{} {}",
                 style("Results page:").green(),
-                style(results_url).cyan().underlined()
+                style(&results_url).cyan().underlined()
             );
+            if submit.open {
+                open::that(&results_url).expect("Failed to open browser");
+            }
         }
     }
 }
