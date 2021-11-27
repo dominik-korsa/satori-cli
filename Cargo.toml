@@ -2,6 +2,11 @@
 name = "satori-cli"
 version = "1.0.0"
 edition = "2021"
+description = "Command line program to submit solutions on code testing platform Satori"
+categories = ["command-line-utilities", "development-tools"]
+license = "MIT"
+repository = "https://github.com/dominik-korsa/satori-cli"
+keywords = ["satori", "cli", "submit", "uj"]
 
 [[bin]]
 name = "satori"
