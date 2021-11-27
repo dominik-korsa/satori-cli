@@ -10,8 +10,13 @@ path = "src/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-reqwest = "0.11.6"
+reqwest = { version = "0.11.6", features=["cookies", "blocking"] }
+cookie_store = "0.15.0"
 clap = { version = "3.0.0-beta.5", features=["derive"] }
 dialoguer = "0.9.0"
 console = "0.15.0"
 directories = "4.0.1"
+envy = "0.4.2"
+serde = "1.0.130"
+cookie = "0.15.0"
+bytes = "1.0.1"
