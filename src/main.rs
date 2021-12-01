@@ -114,7 +114,7 @@ fn main() {
         Subcommand::Submit(submit) => {
             let requests = ensure_signed_in(submit.ci);
             let url_regex = regex::Regex::new(
-                r"\b(?:https?://)?satori\.tcs\.uj\.edu\.pl/contest/(\d+)/problems/(\d+)(?:\s|$|/)",
+                r"\b(?:https?://)?satori\.tcs\.uj\.edu\.pl/contest/(\d+)/problems/(\d+)(?:\s|$|/|\?|#)",
             )
             .unwrap();
             let content = fs::read_to_string(&submit.filename).unwrap();
